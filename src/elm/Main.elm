@@ -1,50 +1,54 @@
+-- import Http
+-- import Json.Decode as Json
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing ( onClick )
 
 -- component import example
-import Components.Hello exposing ( hello )
+import Components.Hello as Hello
 
 
 -- APP
-main : Program Never Int Msg
+main : Program Never Model Msg
 main =
-  Html.beginnerProgram { model = model, view = view, update = update }
+  Html.beginnerProgram
+    { model = model
+    , view = view
+    , update = update }
 
 
 -- MODEL
-type alias Model = Int
+type alias Model =
+  { helloModel: Hello.Model
+  }
 
-model : number
-model = 0
-
+model : Model
+model =
+  { helloModel = Hello.initialModel
+  }
 
 -- UPDATE
-type Msg = NoOp | Increment
+type Msg =
+  HelloMsg Hello.Msg
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    NoOp -> model
-    Increment -> model + 1
-
+    HelloMsg subMsg ->
+      let updatedHelloModel = Hello.update subMsg model.helloModel
+      in { model | helloModel = updatedHelloModel }
 
 -- VIEW
 -- Html is defined as: elem [ attribs ][ children ]
 -- CSS can be applied via class names or inline style attrib
 view : Model -> Html Msg
 view model =
-  div [ class "container", style [("margin-top", "30px"), ( "text-align", "center" )] ][    -- inline CSS (literal)
-    div [ class "row" ][
-      div [ class "col-xs-12" ][
-        div [ class "jumbotron" ][
+  div [ class "container", style [("margin-top", "30px"), ( "text-align", "center" )] ] [    -- inline CSS (literal)
+    div [ class "row" ] [
+      div [ class "col-xs-12" ] [
+        div [ class "jumbotron" ] [
           img [ src "static/img/elm.jpg", style styles.img ] []                             -- inline CSS (via var)
-          , hello model                                                                     -- ext 'hello' component (takes 'model' as arg)
+          , div [] [ Html.map HelloMsg (Hello.view model.helloModel) ]
           , p [] [ text ( "Elm Webpack Starter" ) ]
-          , button [ class "btn btn-primary btn-lg", onClick Increment ] [                  -- click handler
-            span[ class "glyphicon glyphicon-star" ][]                                      -- glyphicon
-            , span[][ text "FTW!" ]
-          ]
         ]
       ]
     ]
